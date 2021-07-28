@@ -71,6 +71,7 @@ The main script is *00_master_code.R* which using a R-function:
 3. Transform the .jpg images into .tf-records
 4. Perform the training with transfer learning from a source to target domain
 
+Next, is presenting an example of how to execute the code for a single experiment.
 ```
 > # Define working directory
 > root <<- '.'
