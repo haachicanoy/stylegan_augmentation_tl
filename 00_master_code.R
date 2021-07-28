@@ -1,6 +1,9 @@
-# Master code generative modeling thesis
-# By: Harold Achicanoy
-# Universidad del Valle
+# Copyright (c) 2021. All rights reserved.
+#
+# This work is licensed under the Creative Commons Attribution-NonCommercial
+# 4.0 International License. To view a copy of this license, visit
+# http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+# Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 options(warn = -1, scipen = 999)
 suppressMessages(library(readr))
@@ -8,17 +11,18 @@ suppressMessages(library(readr))
 # Run StyleGAN function
 run_stylegan <- function(source_domain = "paintings", target_domain = "young_faces", pretrained_model = "network-snapshot-008040.pkl", resolution = 512, last_iteration = 8040, target_iteration = 9000, learning_rate = lr, minibatch_rep = mb_rep){
   
+  # Cloning StyleGAN official repository
   system('git clone https://github.com/NVlabs/stylegan.git')
   wk_dir <- paste0('stylegan_from_', source_domain, '_to_', target_domain)
   file.rename(from = 'stylegan', to = wk_dir)
   
-  # Move to specific dir
+  # Move to working directory
   setwd(paste0('./', wk_dir))
   
   # Create .tfrecords files
   system(paste0('python dataset_tool.py create_from_images datasets/smalls/ ', paste0(root, '/images/', target_domain, "/", resolution)))
   
-  # Modify training_loop.py
+  # Modify training_loop.py script
   training_loop <- readLines('./training/training_loop.py')
   training_loop[127] <- gsub(pattern = '4', replacement = minibatch_rep, x = training_loop[127]) # Minibatch repeats
   training_loop[136] <- gsub(pattern = "None,", replacement = paste0("'", root, '/pretrained/', pretrained_model, "',"), x = training_loop[136]) # Path where pretrained model is
@@ -26,7 +30,7 @@ run_stylegan <- function(source_domain = "paintings", target_domain = "young_fac
   readr::write_lines(training_loop, './training/training_loop.py')
   rm(training_loop)
   
-  # Modify train.py
+  # Modify train.py script
   train <- readLines('./train.py')
   train[32] <- paste0("    #metrics       = [metric_base.fid50k]                                                   # Options for MetricGroup.")
   train[37] <- paste0("    desc += '-custom';     dataset = EasyDict(tfrecord_dir='smalls', resolution=", resolution,");              train.mirror_augment = True") # Preparing new dataset with determined resolution
@@ -44,6 +48,7 @@ run_stylegan <- function(source_domain = "paintings", target_domain = "young_fac
   readr::write_lines(train, './train.py')
   rm(train)
   
+  # Excuting the StyleGAN training
   system('python train.py')
   cat(paste0('Experiment ', wk_dir, ' finished successfully!\n'))
   setwd(paste0(root, '/simulations'))
@@ -51,8 +56,8 @@ run_stylegan <- function(source_domain = "paintings", target_domain = "young_fac
 }
 
 # Define working directory
-root <<- '/media/argos/DATA/HTH'
-setwd(root) # Harold THesis
+root <<- '.'
+setwd(root)
 
 # Original domain - pretrained models from Google Drive
 # tl_models <- list(portraits = '1R2nJe2Ho3Eleg0e6eP_hlKuVmu8NAoDG',
@@ -90,8 +95,8 @@ target_domain <- list(beans       = 'beans',
                       elder_faces = 'elder_faces')
 
 # Hyperparameters to modify
-lr     <- 0.001 # Learning rates for Generator and Discriminator networks c(0.001, 0.0003)
-mb_rep <- 1     # Minibatch repetitions
+lr     <- 0.003 # Learning rates for Generator and Discriminator networks: 0.0003
+mb_rep <- 4     # Minibatch repetitions
 
 # Move to simulations folder
 setwd('./simulations')
@@ -117,34 +122,36 @@ for(tg in names(target_domain)){
 
 # ------------------------------------------------------------------------------------------------
 # Run an individual simulation
-
-options(warn = -1, scipen = 999)
-suppressMessages(library(readr))
-
-# Define working directory
-root <<- '/media/argos/DATA/HTH'
-setwd(root) # Harold THesis
-
-# Move to simulations folder
-setwd('./simulations')
-
-# Define hyperparameters
-lr     <<- 0.001 # Learning rates for Generator and Discriminator networks c(0.001, 0.0003)
-mb_rep <<- 1     # Minibatch repetitions
-
-run_stylegan(source_domain    = "paintings",
-             target_domain    = "young_faces",
-             pretrained_model = "network-snapshot-008040.pkl",
-             resolution       = 512,
-             last_iteration   = 8040,
-             target_iteration = 9000,
-             learning_rate    = lr,
-             minibatch_rep    = mb_rep)
-run_stylegan(source_domain    = "paintings",
-             target_domain    = "chars",
-             pretrained_model = "network-snapshot-008040.pkl",
-             resolution       = 512,
-             last_iteration   = 8040,
-             target_iteration = 9000,
-             learning_rate    = lr,
-             minibatch_rep    = mb_rep)
+#
+# options(warn = -1, scipen = 999)
+# suppressMessages(library(readr))
+#
+# # Define working directory
+# root <<- '.'
+# setwd(root)
+#
+# # Move to simulations folder
+# setwd('./simulations')
+#
+# # Define hyperparameters
+# lr     <<- 0.003 # Learning rates for Generator and Discriminator networks: 0.0003
+# mb_rep <<- 4     # Minibatch repetitions
+#
+# # From paintings pre-trained model to generate young faces images
+# run_stylegan(source_domain    = "paintings",
+#              target_domain    = "young_faces",
+#              pretrained_model = "network-snapshot-008040.pkl",
+#              resolution       = 512,
+#              last_iteration   = 8040,
+#              target_iteration = 9000,
+#              learning_rate    = lr,
+#              minibatch_rep    = mb_rep)
+# From paintings pre-trained model to generate charcoal images
+# run_stylegan(source_domain    = "paintings",
+#              target_domain    = "chars",
+#              pretrained_model = "network-snapshot-008040.pkl",
+#              resolution       = 512,
+#              last_iteration   = 8040,
+#              target_iteration = 9000,
+#              learning_rate    = lr,
+#              minibatch_rep    = mb_rep)

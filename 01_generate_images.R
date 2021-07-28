@@ -1,23 +1,29 @@
-# Master code generative modeling thesis: generate images
-# By: Harold Achicanoy
-# Universidad del Valle
+# Copyright (c) 2021. All rights reserved.
+#
+# This work is licensed under the Creative Commons Attribution-NonCommercial
+# 4.0 International License. To view a copy of this license, visit
+# http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+# Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 options(warn = -1, scipen = 999)
 suppressMessages(library(readr))
 
+# Grid of experiments
 cases2evaluate <- data.frame(Source = c(c('portraits','pokemon','paintings','cats','bedrooms'),
                                         c('paintings','bedrooms','cats'),
                                         c('portraits','pokemon','paintings','cats','bedrooms')),
                              Target = c(rep('beans',5),
                                         rep('chars',3),
                                         rep('young_faces',5)))
+# The unsuccessful experiments are excluded
 cases2evaluate <- cases2evaluate[c(3:10,12,13),]
 
 # Define working directory
-root <<- '/media/argos/DATA/HTH'
+root <<- '.'
 setwd(root)
 setwd('./simulations')
 
+# Function to generate images
 generate_images <- function(source_domain = "paintings",
                             target_domain = "young_faces",
                             number_images = 1000,
@@ -58,21 +64,25 @@ generate_images <- function(source_domain = "paintings",
   }
   return(cat(paste0('Images generated for run: ',source_domain,' to ',target_domain,'\n')))
   
-  root <<- '/media/argos/DATA/HTH'
+  root <<- '.'
   setwd(root)
   setwd('./simulations')
   
 }
 
-# generate_images(source_domain = 'paintings',
-#                 target_domain = 'young_faces',
-#                 model         = 'network-final.pkl',
-#                 number_images = 1000,
-#                 trunc_psi     = 0.7)
-
+# Run all possible simulations
 for(j in 1:nrow(cases2evaluate)){
   generate_images(source_domain = cases2evaluate$Source[j],
                   target_domain = cases2evaluate$Target[j],
                   number_images = 1000,
                   trunc_psi     = 0.7)
 }
+
+# ------------------------------------------------------------------------------------------------
+# Run an individual case
+# # Generate young faces images from transfered learning model pre-trained on paintings
+# generate_images(source_domain = 'paintings',
+#                 target_domain = 'young_faces',
+#                 model         = 'network-final.pkl',
+#                 number_images = 1000,
+#                 trunc_psi     = 0.7)

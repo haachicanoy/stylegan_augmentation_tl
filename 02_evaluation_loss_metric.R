@@ -1,14 +1,22 @@
+# Copyright (c) 2021. All rights reserved.
+#
+# This work is licensed under the Creative Commons Attribution-NonCommercial
+# 4.0 International License. To view a copy of this license, visit
+# http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
+# Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
 options(warn = -1, scipen = 999)
 
 suppressPackageStartupMessages(library(googlesheets4))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(RColorBrewer))
 
+# Get loss scores
 googlesheets4::gs4_auth()
 metrics <- googlesheets4::read_sheet('https://docs.google.com/spreadsheets/d/17XVqT8Oc6T7_zn3q6TWJHURcjhhotkuCEjP9mwVPR1c/edit#gid=0')
 metrics %>% dplyr::glimpse()
-# metrics$Value <- metrics$Value %>% gsub(',','.',.) %>% as.numeric
 
+# Graph scores
 gg <- metrics %>%
   dplyr::filter(Metric %in% c('Loss scores real','Loss scores fake')) %>%
   dplyr::mutate(Metric = factor(Metric, levels = c('Loss scores real','Loss scores fake'))) %>%
@@ -29,4 +37,4 @@ gg <- metrics %>%
                  legend.text = element_text(size = 17),
                  legend.title = element_text(size = 20),
                  strip.text.x = element_text(size = 20))
-ggplot2::ggsave(filename = "/Volumes/BACKUP/Documents/Masters/Loss_scores.png", plot = gg, device = "png", width = 14, height = 8, units = "in")
+ggplot2::ggsave(filename = "./Loss_scores.png", plot = gg, device = "png", width = 14, height = 8, units = "in")
